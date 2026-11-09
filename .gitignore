@@ -1,0 +1,7 @@
+results/
+__pycache__/
+*.py[cod]
+.venv/
+.DS_Store
+*.kubeconfig
+.env

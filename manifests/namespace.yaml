@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: datastore-load-test
+  labels:
+    app.kubernetes.io/managed-by: datastore-load-test
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: datastore-load-test
+spec:
+  hard:
+    pods: "3"
+    persistentvolumeclaims: "1"
+    requests.storage: 1Gi
+    requests.cpu: 400m
+    requests.memory: 384Mi
+    limits.cpu: 1200m
+    limits.memory: 768Mi

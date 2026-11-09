@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: datastore-load-test
+resources:
+  - namespace.yaml
+  - api.yaml
+  - ingress.yaml
+configMapGenerator:
+  - name: datastore-load-api
+    files:
+      - server.py
+  - name: datastore-load-k6
+    files:
+      - loadtest.js
+generatorOptions:
+  disableNameSuffixHash: true

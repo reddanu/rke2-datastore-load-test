@@ -1,0 +1,59 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  generateName: load-generator-
+  namespace: datastore-load-test
+  labels:
+    app.kubernetes.io/name: load-generator
+spec:
+  backoffLimit: 0
+  activeDeadlineSeconds: 750
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: load-generator
+    spec:
+      restartPolicy: Never
+      automountServiceAccountToken: false
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: node-role.kubernetes.io/worker
+                    operator: In
+                    values: ["true"]
+                  - key: node-role.kubernetes.io/control-plane
+                    operator: DoesNotExist
+                  - key: node-role.kubernetes.io/master
+                    operator: DoesNotExist
+                  - key: node-role.kubernetes.io/etcd
+                    operator: DoesNotExist
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: k6
+          image: grafana/k6:0.54.0
+          args: ["run", "/scripts/loadtest.js"]
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 10001
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: script
+              mountPath: /scripts
+              readOnly: true
+      volumes:
+        - name: script
+          configMap:
+            name: datastore-load-k6
